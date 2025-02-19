@@ -7,22 +7,29 @@ public class MinoBoard : MonoBehaviour {
     private const int BoardHeight = 40;
 
     private Transform[,] boardGrid;
-    private ObjectRange objectRange;
+    private Vector2Int boardButtomLeftPosition;
+    private Vector2Int boardTopRightPosition;
 
     public void Start() {
         boardGrid = new Transform[BoardWidth, BoardHeight];
         SpriteRenderer sprite = GetComponent<SpriteRenderer>();
-        objectRange = new ObjectRange();
         float halfBoardWidth = BoardWidth / 2.0f;
         float halfBoardHeight = BoardHeight / 2.0f;
-        objectRange.minRange = new Vector2(transform.position.x - halfBoardWidth, transform.position.y - halfBoardHeight);
-        objectRange.maxRange = new Vector2(transform.position.x + halfBoardWidth, transform.position.y + halfBoardHeight);
+        boardButtomLeftPosition = new Vector2Int(
+            Mathf.RoundToInt(transform.position.x - halfBoardWidth),
+            Mathf.RoundToInt(transform.position.y - halfBoardHeight)
+        );
+        boardTopRightPosition = new Vector2Int(
+            Mathf.RoundToInt(transform.position.x + halfBoardWidth),
+            Mathf.RoundToInt(transform.position.y + halfBoardHeight)
+        );
     }
 
-    public bool IsValidPosition(Vector3 pos) {
-        Debug.Log("pos=" + pos);
-        Debug.Log("max=" + objectRange.maxRange);
-        return pos.x - HalfUnitSize >= objectRange.minRange.x && pos.x + HalfUnitSize <= objectRange.maxRange.x
-            && pos.y - HalfUnitSize >= objectRange.minRange.y && pos.y + HalfUnitSize <= objectRange.maxRange.y;
+    public bool IsValidPosition(Vector2 pos) {
+        int left = Mathf.RoundToInt(pos.x - HalfUnitSize);
+        int right = Mathf.RoundToInt(pos.x + HalfUnitSize);
+        int buttom = Mathf.RoundToInt(pos.y - HalfUnitSize);
+
+        return left >= boardButtomLeftPosition.x && right <= boardTopRightPosition.x && buttom >= boardButtomLeftPosition.y;
     }
 }
