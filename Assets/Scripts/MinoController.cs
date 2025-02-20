@@ -1,28 +1,46 @@
 using UnityEngine;
 
 public class MinoController : MonoBehaviour {
+    [SerializeField]
+    private GameObject minoQueueObject;
+
+    private MinoQueue minoQueue;
     private TetriMino currentMino;
     private MinoBoard minoBoard;
-
-    public void SetCurrentMino(TetriMino mino) {
-        currentMino = mino;
-        currentMino.transform.position = new Vector3(0.0f, 0.0f, 0.0f);
+    public bool MinoControll {
+        get; private set;
     }
 
-    public void SetMinoBoard(MinoBoard board) {
+    public void Start() {
+        minoQueue = minoQueueObject.GetComponent<MinoQueue>();
+    }
+
+    public void Initialize(MinoBoard board) {
+        MinoControll = false;
         minoBoard = board;
     }
 
-    public void FreeFall() {
-        currentMino.transform.position += new Vector3(0.0f, -1.0f);
+    public void SetCurrentMino() {
+        if(minoQueue.Count < 7) {
+            minoQueue.Refill();
+        }
 
-        if(IsMinoMove()) {
-            Debug.Log("");
+        currentMino = minoQueue.Dequeue();
+        currentMino.transform.SetParent(transform);
+        currentMino.transform.position = transform.position;
+        MinoControll = true;
+    }
+
+    public void FreeFall() {
+        currentMino.transform.position += Vector3.down;
+
+        if(!IsMinoMove()) {
+            MinoControll = false;
         }
     }
 
     public void MoveLeft() {
-        currentMino.transform.position -= new Vector3(1.0f, 0.0f);
+        currentMino.transform.position += Vector3.left;
 
         if(!IsMinoMove()) {
             MoveRight();
@@ -30,16 +48,15 @@ public class MinoController : MonoBehaviour {
     }
 
     public void MoveRight() {
-        currentMino.transform.position += new Vector3(1.0f, 0.0f);
+        currentMino.transform.position += Vector3.right;
 
         if(!IsMinoMove()) {
             MoveLeft();
         }
     }
 
-#if DEBUG
     public void MoveUp() {
-        currentMino.transform.position += new Vector3(0.0f, 1.0f);
+        currentMino.transform.position += Vector3.up;
 
         if(!IsMinoMove()) {
             MoveDown();
@@ -47,16 +64,15 @@ public class MinoController : MonoBehaviour {
     }
 
     public void MoveDown() {
-        currentMino.transform.position -= new Vector3(0.0f, 1.0f);
+        currentMino.transform.position += Vector3.down;
 
         if(!IsMinoMove()) {
             MoveUp();
         }
     }
 
-#endif
     public void RotateLeft() {
-        currentMino.transform.RotateAround(currentMino.MinoAxis, new Vector3(0.0f, 0.0f, 1.0f), 90.0f);
+        currentMino.Rotate(TetriMino.RotateDirection.ClockWise);
 
         if(!IsMinoMove()) {
             RotateRight();
@@ -64,7 +80,7 @@ public class MinoController : MonoBehaviour {
     }
 
     public void RotateRight() {
-        currentMino.transform.RotateAround(currentMino.MinoAxis, new Vector3(0.0f, 0.0f, 1.0f), -90.0f);
+        currentMino.Rotate(TetriMino.RotateDirection.CounterClockWise);
 
         if(!IsMinoMove()) {
             RotateLeft();
@@ -72,12 +88,20 @@ public class MinoController : MonoBehaviour {
     }
 
     private bool IsMinoMove() {
-        foreach(Transform pos in currentMino.MinoChildren) {
-            if(!minoBoard.IsValidPosition(pos.position)) {
+        foreach(Transform block in currentMino.MinoChildren) {
+            if(!minoBoard.IsValidPosition(block.position)) {
+                return false;
+            }
+
+            if(!minoBoard.IsMinoCheck(block.position)) {
                 return false;
             }
         }
 
         return true;
+    }
+
+    private void PlaceMinoOnTheBoard() {
+        minoBoard.PlaceMino(currentMino.MinoChildren);
     }
 }
