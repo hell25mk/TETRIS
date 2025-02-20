@@ -1,6 +1,11 @@
 using UnityEngine;
 
 public class TetriMino : MonoBehaviour {
+    public enum RotateDirection {
+        ClockWise,
+        CounterClockWise
+    }
+
     [SerializeField]
     private Transform[] minoChildren;
     [SerializeField]
@@ -17,9 +22,16 @@ public class TetriMino : MonoBehaviour {
         }
     }
 
-    public Vector3 MinoAxis {
-        get {
-            return minoAxis.position;
+    public void Rotate(RotateDirection direction) {
+        float angle = (direction == RotateDirection.ClockWise) ? 90.0f : -90.0f;
+        transform.RotateAround(minoAxis.position, new Vector3(0.0f, 0.0f, 1.0f), angle);
+
+        ChildrenRotateReset();
+    }
+
+    private void ChildrenRotateReset() {
+        foreach(Transform mino in minoChildren) {
+            mino.transform.rotation = Quaternion.Euler(0.0f, 0.0f, 0.0f);
         }
     }
 }
