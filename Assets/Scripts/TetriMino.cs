@@ -30,8 +30,8 @@ public class TetriMino : MonoBehaviour {
     }
 
     private void ChildrenRotateReset() {
-        foreach(Transform mino in minoChildren) {
-            mino.transform.rotation = Quaternion.Euler(0.0f, 0.0f, 0.0f);
+        foreach(Transform block in minoChildren) {
+            block.transform.rotation = Quaternion.Euler(0.0f, 0.0f, 0.0f);
         }
     }
 }
