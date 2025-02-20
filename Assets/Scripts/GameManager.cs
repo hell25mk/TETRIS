@@ -5,30 +5,50 @@ public class GameManager : MonoBehaviour {
     private GameObject minoQueueObject;
     [SerializeField]
     private GameObject minoBoardObject;
+    [SerializeField]
+    private GameObject minoControllerObject;
 
     private MinoBoard minoBoard;
     private MinoQueue minoQueue;
     private MinoController minoController;
 
+    private float gameTimer;
+    private float minoFallTimer;
+    private float minoFallInterval;
+
     public void Start() {
         minoQueue = minoQueueObject.GetComponent<MinoQueue>();
         minoBoard = minoBoardObject.GetComponent<MinoBoard>();
-        minoController = GetComponent<MinoController>();
-        minoController.SetMinoBoard(minoBoard);
+        minoBoard.BoardInitialize();
+        minoController = minoControllerObject.GetComponent<MinoController>();
+        minoController.Initialize(minoBoard);
+
+        gameTimer = 0.0f;
+        minoFallTimer = 0.0f;
+        minoFallInterval = 1.0f;
     }
 
     public void Update() {
-        if(Input.GetKeyDown(KeyCode.Alpha1)) {
-            minoQueue.Refill();
-        }
+        UpdateInGame();
+    }
 
-        if(Input.GetKeyDown(KeyCode.Alpha2)) {
-            TetriMino mino = minoQueue.Dequeue();
-            mino.transform.SetParent(minoBoardObject.transform);
-            minoController.SetCurrentMino(mino);
+    public void UpdateInGame() {
+        if(!minoController.MinoControll) {
+            minoController.SetCurrentMino();
+            return;
         }
 
         PlayerInput();
+
+        gameTimer += Time.deltaTime;
+
+        if(minoFallTimer < minoFallInterval) {
+            minoFallTimer += Time.deltaTime;
+            return;
+        }
+
+        minoFallTimer = 0.0f;
+        minoController.FreeFall();
     }
 
     private void PlayerInput() {
@@ -37,6 +57,13 @@ public class GameManager : MonoBehaviour {
         }
         if(Input.GetKeyDown(KeyCode.RightArrow)) {
             minoController.MoveRight();
+        }
+        // デバッグ用
+        if(Input.GetKeyDown(KeyCode.UpArrow)) {
+            minoController.MoveUp();
+        }
+        if(Input.GetKeyDown(KeyCode.DownArrow)) {
+            minoController.MoveDown();
         }
 
         if(Input.GetKeyDown(KeyCode.A)) {
