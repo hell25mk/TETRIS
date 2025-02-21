@@ -8,11 +8,12 @@ public class MinoGenerator : MonoBehaviour {
     private TetriMino[] minoPrefabs;
 
     private List<TetriMino> minos;
-    private List<MinoType> minoTypes;
+    private List<EMinoType.Type> minoTypes;
 
     public void Start() {
         minos = new List<TetriMino>();
-        minoTypes = Enum.GetValues(typeof(MinoType)).Cast<MinoType>().ToList();
+        //minoTypes = Enum.GetValues(typeof(MinoType)).Cast<MinoType>().ToList();
+        minoTypes = EMinoType.TypeList;
     }
 
     public List<TetriMino> GenerateMinoSet(Transform parent) {

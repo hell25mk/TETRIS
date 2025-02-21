@@ -79,7 +79,8 @@ public class MinoController : MonoBehaviour {
     }
 
     public void SetCurrentMino() {
-        if(minoQueue.Count < 7) {
+        MyDebug.Logger.Log(minoQueue.Count);
+        if(minoQueue.Count < EMinoType.TypeCount) {
             minoQueue.Refill();
         }
 
