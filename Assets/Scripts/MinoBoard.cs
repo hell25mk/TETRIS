@@ -8,8 +8,7 @@ public class MinoBoard : MonoBehaviour {
     private const int BoardWidth = 10;
     private const int BoardHeight = 40;
 
-    private List<List<Transform>> lBoardGrid;
-    private Transform[,] boardGrid;
+    private List<List<Transform>> boardGrid;
     private Coordinates coordinates;
 
     public void Start() {
@@ -24,12 +23,11 @@ public class MinoBoard : MonoBehaviour {
     }
 
     public void BoardInitialize() {
-        lBoardGrid = new List<List<Transform>>();
-        for(int y = 0; y < BoardHeight; y++) {
-            lBoardGrid.Add(CreateEmptyLine());
-        }
+        boardGrid = new List<List<Transform>>();
 
-        boardGrid = new Transform[BoardWidth, BoardHeight];
+        for(int y = 0; y < BoardHeight; y++) {
+            boardGrid.Add(CreateEmptyLine());
+        }
     }
 
     public bool IsValidPosition(Vector2 pos) {
@@ -37,14 +35,15 @@ public class MinoBoard : MonoBehaviour {
         int right = Mathf.RoundToInt(pos.x + HalfUnitSize);
         int buttom = Mathf.RoundToInt(pos.y - HalfUnitSize);
 
-        return left >= coordinates.ButtomLeft.x && right <= coordinates.ButtomRight.x && buttom > coordinates.ButtomLeft.y;
+        return left >= coordinates.ButtomLeft.x
+            && right <= coordinates.ButtomRight.x
+            && buttom >= coordinates.ButtomLeft.y;
     }
 
     public bool IsMinoCheck(Vector2 pos) {
         Vector2Int grid = PositionToGrid(pos);
 
-        return lBoardGrid[grid.y][grid.x] = null;
-        //return boardGrid[grid.x, grid.y] == null;
+        return boardGrid[grid.y][grid.x] == null;
     }
 
     public Vector2Int PositionToGrid(Vector2 pos) {
@@ -60,9 +59,9 @@ public class MinoBoard : MonoBehaviour {
         List<int> rows = new List<int>();
 
         foreach(Transform block in blocks) {
+            block.SetParent(transform);
             Vector2Int grid = PositionToGrid(block.position);
-            lBoardGrid[grid.y][grid.x] = block;
-            //boardGrid[grid.x, grid.y] = block;
+            boardGrid[grid.y][grid.x] = block;
 
             if(!rows.Contains(grid.y)) {
                 rows.Add(grid.y);
@@ -93,13 +92,12 @@ public class MinoBoard : MonoBehaviour {
             }
 
             for(int x = 0; x < BoardWidth; x++) {
-                Destroy(lBoardGrid[y][x].gameObject);
-                //Destroy(boardGrid[x, y].gameObject);
-                //boardGrid[x, y] = null;
+                Destroy(boardGrid[y][x].gameObject);
             }
 
-            lBoardGrid.RemoveAt(y);
-            lBoardGrid.Insert(0, CreateEmptyLine());
+            boardGrid.RemoveAt(y);
+            LineFall(y);
+            boardGrid.Insert(0, CreateEmptyLine());
 
             clearLineCount++;
         }
@@ -109,12 +107,48 @@ public class MinoBoard : MonoBehaviour {
 
     private bool IsLineFilled(int y) {
         for(int x = 0; x < BoardWidth; x++) {
-            if(lBoardGrid[y][x] == null) {
-            //if(boardGrid[x, y] == null) {
+            if(boardGrid[y][x] == null) {
                 return false;
             }
         }
 
         return true;
     }
+
+    private void LineFall(int row) {
+        for(int y = row - 1; y > 0; --y) {
+            foreach(Transform block in boardGrid[y]) {
+                if(block == null) {
+                    continue;
+                }
+
+                block.position += Vector3.down;
+            }
+        }
+    }
+
+#if DEBUG
+    private void OnGUI() {
+        if(boardGrid == null || boardGrid.Count == 0) {
+            return;
+        }
+
+        string board = "";
+
+        for(int y = 0; y < BoardHeight; y++) {
+            foreach(Transform x in boardGrid[y]) {
+                board += x != null ? "1" : "0";
+            }
+
+            board += "\n";
+        }
+
+        GUIStyle style = new GUIStyle();
+        style.fontSize = 20;
+        style.normal.textColor = Color.white;
+
+        GUI.Label(new Rect(10, 10, 500, 1000), board, style);
+    }
+#endif
+
 }
