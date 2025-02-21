@@ -7,35 +7,26 @@ public class MinoController : MonoBehaviour {
     private MinoQueue minoQueue;
     private TetriMino currentMino;
     private MinoBoard minoBoard;
-    public bool MinoControll {
-        get; private set;
+
+    public bool HasCurrentMino {
+        get => currentMino != null;
     }
 
     public void Start() {
         minoQueue = minoQueueObject.GetComponent<MinoQueue>();
+        currentMino = null;
     }
 
     public void Initialize(MinoBoard board) {
-        MinoControll = false;
         minoBoard = board;
-    }
-
-    public void SetCurrentMino() {
-        if(minoQueue.Count < 7) {
-            minoQueue.Refill();
-        }
-
-        currentMino = minoQueue.Dequeue();
-        currentMino.transform.SetParent(transform);
-        currentMino.transform.position = transform.position;
-        MinoControll = true;
     }
 
     public void FreeFall() {
         currentMino.transform.position += Vector3.down;
 
         if(!IsMinoMove()) {
-            MinoControll = false;
+            currentMino.transform.position += Vector3.up;
+            PlaceMinoOnTheBoard();
         }
     }
 
@@ -87,6 +78,16 @@ public class MinoController : MonoBehaviour {
         }
     }
 
+    public void SetCurrentMino() {
+        if(minoQueue.Count < 7) {
+            minoQueue.Refill();
+        }
+
+        currentMino = minoQueue.Dequeue();
+        currentMino.transform.SetParent(transform);
+        currentMino.transform.position = transform.position;
+    }
+
     private bool IsMinoMove() {
         foreach(Transform block in currentMino.MinoChildren) {
             if(!minoBoard.IsValidPosition(block.position)) {
@@ -103,5 +104,7 @@ public class MinoController : MonoBehaviour {
 
     private void PlaceMinoOnTheBoard() {
         minoBoard.PlaceMino(currentMino.MinoChildren);
+        Destroy(currentMino.gameObject);
+        currentMino = null;
     }
 }
