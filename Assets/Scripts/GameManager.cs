@@ -33,7 +33,7 @@ public class GameManager : MonoBehaviour {
     }
 
     public void UpdateInGame() {
-        if(!minoController.MinoControll) {
+        if(!minoController.HasCurrentMino) {
             minoController.SetCurrentMino();
             return;
         }
