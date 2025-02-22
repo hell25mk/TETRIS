@@ -103,6 +103,7 @@ public class MinoController : MonoBehaviour {
         }
 
         holdMino.transform.position = new Vector2(-7.5f, 7.5f); // Žb’è‘Î‰ž
+        holdMino.transform.rotation = Quaternion.identity;
         isHoldExecute = true;
     }
 
