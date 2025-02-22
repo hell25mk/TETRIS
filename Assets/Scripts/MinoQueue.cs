@@ -1,25 +1,39 @@
 using System.Collections.Generic;
-using UnityEditor.SceneManagement;
 using UnityEngine;
 
 public class MinoQueue : MonoBehaviour {
     private MinoGenerator minoGenerator;
-    private Queue<TetriMino> minoQueue;
+    private List<EMinoType.Type> minoTypes;
+    private Queue<EMinoType.Type> minoQueue;
 
     public int Count => minoQueue.Count;
 
     public void Start() {
         minoGenerator = GetComponent<MinoGenerator>();
-        minoQueue = new Queue<TetriMino>();
+        minoTypes = EMinoType.TypeList;
     }
 
-    public void Refill() {
-        foreach(TetriMino mino in minoGenerator.GenerateMinoSet(transform)) {
-            minoQueue.Enqueue(mino);
+    public void Initialize() {
+        minoQueue = new Queue<EMinoType.Type>();
+    }
+
+    private void FisherYastesShuffle() {
+        for(int i = EMinoType.TypeCount - 1; i > 0; --i) {
+            int j = Random.Range(0, i + 1);
+
+            (minoTypes[j], minoTypes[i]) = (minoTypes[i], minoTypes[j]);
         }
     }
 
-    public TetriMino Dequeue() {
-        return minoQueue.Dequeue();
+    public void Refill() {
+        FisherYastesShuffle();
+
+        foreach(EMinoType.Type type in minoTypes){
+            minoQueue.Enqueue(type);
+        }
+    }
+
+    public TetriMino Dequeue(Transform parent) {
+        return minoGenerator.GenerateMino(minoQueue.Dequeue(), parent);
     }
 }
