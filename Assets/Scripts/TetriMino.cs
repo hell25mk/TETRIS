@@ -11,11 +11,6 @@ public class TetriMino : MonoBehaviour {
     [SerializeField]
     private Transform minoAxis;
 
-    [SerializeField]
-    private MinoType minoType {
-        get; set;
-    }
-
     public Transform[] MinoChildren {
         get {
             return minoChildren;
