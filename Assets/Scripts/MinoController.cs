@@ -4,9 +4,11 @@ public class MinoController : MonoBehaviour {
     [SerializeField]
     private GameObject minoQueueObject;
 
+    private MinoBoard minoBoard;
     private MinoQueue minoQueue;
     private TetriMino currentMino;
-    private MinoBoard minoBoard;
+    private TetriMino holdMino;
+    private bool isHoldExecute;
 
     public bool HasCurrentMino {
         get => currentMino != null;
@@ -15,6 +17,7 @@ public class MinoController : MonoBehaviour {
     public void Start() {
         minoQueue = minoQueueObject.GetComponent<MinoQueue>();
         currentMino = null;
+        holdMino = null;
     }
 
     public void Initialize(MinoBoard board) {
@@ -25,6 +28,12 @@ public class MinoController : MonoBehaviour {
             Destroy(currentMino.gameObject);
             currentMino = null;
         }
+        if(holdMino != null) {
+            Destroy(holdMino.gameObject);
+            holdMino = null;
+        }
+
+        isHoldExecute = false;
     }
 
     public void FreeFall() {
@@ -77,11 +86,30 @@ public class MinoController : MonoBehaviour {
         }
     }
 
+    public void Hold() {
+        if(isHoldExecute) {
+            return;
+        }
+
+        if(holdMino == null) {
+            holdMino = currentMino;
+            SetCurrentMino();
+        }
+        else {
+            TetriMino temp = holdMino;
+            holdMino = currentMino;
+            currentMino = temp;
+            currentMino.transform.position = transform.position;
+        }
+
+        holdMino.transform.position = new Vector2(-7.5f, 7.5f); // Žb’è‘Î‰ž
+        isHoldExecute = true;
+    }
+
     public bool SetCurrentMino() {
         if(minoQueue.Count <= EMinoType.TypeCount) {
             minoQueue.Refill();
         }
-        MyDebug.Logger.Log(minoQueue.Count);
 
         currentMino = minoQueue.Dequeue(transform);
         currentMino.transform.position = transform.position;
@@ -107,5 +135,6 @@ public class MinoController : MonoBehaviour {
         minoBoard.PlaceMino(currentMino.MinoChildren);
         Destroy(currentMino.gameObject);
         currentMino = null;
+        isHoldExecute = false;
     }
 }
