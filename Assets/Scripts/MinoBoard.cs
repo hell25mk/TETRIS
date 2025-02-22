@@ -20,22 +20,24 @@ public class MinoBoard : MonoBehaviour {
             new Vector2(transform.position.x - halfWidth, transform.position.y - halfHeight),
             new Vector2(transform.position.x + halfWidth, transform.position.y - halfHeight)
         );
-    }
-
-    public void Initialize() {
-        if(boardGrid != null) {
-            for(int y = 0; y < BoardHeight; y++) {
-                for(int x = 0; x < BoardWidth; x++) {
-                    Destroy(boardGrid[y][x].gameObject);
-                    boardGrid[y][x] = null;
-                }
-            }
-        }
 
         boardGrid = new List<List<Transform>>();
 
         for(int y = 0; y < BoardHeight; y++) {
             boardGrid.Add(CreateEmptyLine());
+        }
+    }
+
+    public void Initialize() {
+        for(int y = 0; y < BoardHeight; y++) {
+            for(int x = 0; x < BoardWidth; x++) {
+                if(boardGrid[y][x] == null) {
+                    continue;
+                }
+
+                Destroy(boardGrid[y][x].gameObject);
+                boardGrid[y][x] = null;
+            }
         }
     }
 
@@ -147,7 +149,7 @@ public class MinoBoard : MonoBehaviour {
 
         for(int y = 0; y < BoardHeight; y++) {
             foreach(Transform x in boardGrid[y]) {
-                board += x != null ? "1" : "0";
+                board += x != null ? "¡" : " ";
             }
 
             board += "\n";
@@ -157,7 +159,7 @@ public class MinoBoard : MonoBehaviour {
         style.fontSize = 20;
         style.normal.textColor = Color.white;
 
-        GUI.Label(new Rect(10, 10, 500, 1000), board, style);
+        GUI.Label(new Rect(10, 120, 500, 1000), board, style);
     }
 #endif
 }
