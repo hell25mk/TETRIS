@@ -19,6 +19,12 @@ public class MinoController : MonoBehaviour {
 
     public void Initialize(MinoBoard board) {
         minoBoard = board;
+        minoQueue.Initialize();
+
+        if(currentMino != null) {
+            Destroy(currentMino.gameObject);
+            currentMino = null;
+        }
     }
 
     public void FreeFall() {
@@ -46,19 +52,12 @@ public class MinoController : MonoBehaviour {
         }
     }
 
-    public void MoveUp() {
-        currentMino.transform.position += Vector3.up;
-
-        if(!IsMinoMove()) {
-            MoveDown();
-        }
-    }
-
     public void MoveDown() {
         currentMino.transform.position += Vector3.down;
 
         if(!IsMinoMove()) {
-            MoveUp();
+            currentMino.transform.position += Vector3.up;
+            PlaceMinoOnTheBoard();
         }
     }
 
@@ -78,15 +77,16 @@ public class MinoController : MonoBehaviour {
         }
     }
 
-    public void SetCurrentMino() {
-        MyDebug.Logger.Log(minoQueue.Count);
-        if(minoQueue.Count < EMinoType.TypeCount) {
+    public bool SetCurrentMino() {
+        if(minoQueue.Count <= EMinoType.TypeCount) {
             minoQueue.Refill();
         }
+        MyDebug.Logger.Log(minoQueue.Count);
 
-        currentMino = minoQueue.Dequeue();
-        currentMino.transform.SetParent(transform);
+        currentMino = minoQueue.Dequeue(transform);
         currentMino.transform.position = transform.position;
+
+        return IsMinoMove();
     }
 
     private bool IsMinoMove() {

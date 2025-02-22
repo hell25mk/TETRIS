@@ -1,6 +1,12 @@
 using UnityEngine;
 
 public class GameManager : MonoBehaviour {
+    public enum GameMode {
+        Title = 0,
+        InGame,
+        GameOver
+    }
+
     [SerializeField]
     private GameObject minoQueueObject;
     [SerializeField]
@@ -9,38 +15,61 @@ public class GameManager : MonoBehaviour {
     private GameObject minoControllerObject;
 
     private MinoBoard minoBoard;
-    private MinoQueue minoQueue;
     private MinoController minoController;
 
+    private GameMode gameMode;
     private float gameTimer;
     private float minoFallTimer;
     private float minoFallInterval;
 
     public void Start() {
-        minoQueue = minoQueueObject.GetComponent<MinoQueue>();
         minoBoard = minoBoardObject.GetComponent<MinoBoard>();
-        minoBoard.BoardInitialize();
         minoController = minoControllerObject.GetComponent<MinoController>();
-        minoController.Initialize(minoBoard);
 
+        gameMode = GameMode.Title;
         gameTimer = 0.0f;
+    }
+
+    public void Update() {
+        switch(gameMode) {
+            case GameMode.Title:
+                UpdateTitle();
+                return;
+            case GameMode.InGame:
+                UpdateInGame();
+                return;
+            case GameMode.GameOver:
+                UpdateGameOver();
+                return;
+        }
+    }
+
+    public void UpdateTitle() {
+        if(Input.GetKeyDown(KeyCode.Alpha1)) {
+            gameMode = GameMode.InGame;
+            InitializeInGame();
+        }
+    }
+
+    public void InitializeInGame() {
+        minoBoard.Initialize();
+        minoController.Initialize(minoBoard);
         minoFallTimer = 0.0f;
         minoFallInterval = 1.0f;
     }
 
-    public void Update() {
-        UpdateInGame();
-    }
-
     public void UpdateInGame() {
+        gameTimer += Time.deltaTime;
+
         if(!minoController.HasCurrentMino) {
-            minoController.SetCurrentMino();
+            // 次のミノが出てきた時点でミノが被っていたらゲームオーバー
+            if(!minoController.SetCurrentMino()) {
+                gameMode = GameMode.GameOver;
+            }
             return;
         }
 
         PlayerInput();
-
-        gameTimer += Time.deltaTime;
 
         if(minoFallTimer < minoFallInterval) {
             minoFallTimer += Time.deltaTime;
@@ -50,6 +79,12 @@ public class GameManager : MonoBehaviour {
         minoFallTimer = 0.0f;
         minoController.FreeFall();
     }
+    public void UpdateGameOver() {
+        if(Input.GetKeyDown(KeyCode.Alpha2)) {
+            gameMode = GameMode.Title;
+        }
+    }
+
 
     private void PlayerInput() {
         if(Input.GetKeyDown(KeyCode.LeftArrow)) {
@@ -58,12 +93,11 @@ public class GameManager : MonoBehaviour {
         if(Input.GetKeyDown(KeyCode.RightArrow)) {
             minoController.MoveRight();
         }
-        // デバッグ用
-        if(Input.GetKeyDown(KeyCode.UpArrow)) {
-            minoController.MoveUp();
+        if(Input.GetKey(KeyCode.DownArrow)) {
+            minoFallInterval = 0.01f;
         }
-        if(Input.GetKeyDown(KeyCode.DownArrow)) {
-            minoController.MoveDown();
+        else {
+            minoFallInterval = 1.0f;
         }
 
         if(Input.GetKeyDown(KeyCode.A)) {

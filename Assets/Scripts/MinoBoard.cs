@@ -22,7 +22,16 @@ public class MinoBoard : MonoBehaviour {
         );
     }
 
-    public void BoardInitialize() {
+    public void Initialize() {
+        if(boardGrid != null) {
+            for(int y = 0; y < BoardHeight; y++) {
+                for(int x = 0; x < BoardWidth; x++) {
+                    Destroy(boardGrid[y][x].gameObject);
+                    boardGrid[y][x] = null;
+                }
+            }
+        }
+
         boardGrid = new List<List<Transform>>();
 
         for(int y = 0; y < BoardHeight; y++) {
@@ -31,6 +40,7 @@ public class MinoBoard : MonoBehaviour {
     }
 
     public bool IsValidPosition(Vector2 pos) {
+        // IsMinoCheckだけで十分そう(配列外参照だけ注意)
         int left = Mathf.RoundToInt(pos.x - HalfUnitSize);
         int right = Mathf.RoundToInt(pos.x + HalfUnitSize);
         int buttom = Mathf.RoundToInt(pos.y - HalfUnitSize);
@@ -150,5 +160,4 @@ public class MinoBoard : MonoBehaviour {
         GUI.Label(new Rect(10, 10, 500, 1000), board, style);
     }
 #endif
-
 }
