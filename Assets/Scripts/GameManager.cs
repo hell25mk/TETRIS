@@ -31,6 +31,8 @@ public class GameManager : MonoBehaviour {
     }
 
     public void Update() {
+        gameTimer += Time.deltaTime;
+
         switch(gameMode) {
             case GameMode.Title:
                 UpdateTitle();
@@ -59,8 +61,6 @@ public class GameManager : MonoBehaviour {
     }
 
     public void UpdateInGame() {
-        gameTimer += Time.deltaTime;
-
         if(!minoController.HasCurrentMino) {
             // 次のミノが出てきた時点でミノが被っていたらゲームオーバー
             if(!minoController.SetCurrentMino()) {
@@ -79,12 +79,12 @@ public class GameManager : MonoBehaviour {
         minoFallTimer = 0.0f;
         minoController.FreeFall();
     }
+
     public void UpdateGameOver() {
         if(Input.GetKeyDown(KeyCode.Alpha2)) {
             gameMode = GameMode.Title;
         }
     }
-
 
     private void PlayerInput() {
         if(Input.GetKeyDown(KeyCode.LeftArrow)) {
@@ -106,5 +106,32 @@ public class GameManager : MonoBehaviour {
         if(Input.GetKeyDown(KeyCode.D)) {
             minoController.RotateRight();
         }
+        if(Input.GetKeyDown(KeyCode.Space)) {
+            minoController.Hold();
+        }
     }
+
+#if DEBUG
+    private void OnGUI() {
+        string modeText = "";
+
+        switch(gameMode) {
+            case GameMode.Title:
+                modeText = "Title";
+                break;
+            case GameMode.InGame:
+                modeText = "InGame";
+                break;
+            case GameMode.GameOver:
+                modeText = "GameOver";
+                break;
+        }
+
+        GUIStyle style = new GUIStyle();
+        style.fontSize = 20;
+        style.normal.textColor = Color.white;
+
+        GUI.Label(new Rect(10, 10, 500, 1000), modeText, style);
+    }
+#endif
 }
