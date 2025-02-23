@@ -99,6 +99,13 @@ public class GameManager : MonoBehaviour {
         else {
             minoFallInterval = 1.0f;
         }
+        if(Input.GetKeyDown(KeyCode.UpArrow)) {
+            while(true) {
+                if(!minoController.FreeFall()) {
+                    return;
+                }
+            }
+        }
 
         if(Input.GetKeyDown(KeyCode.A)) {
             minoController.RotateLeft();

@@ -36,13 +36,16 @@ public class MinoController : MonoBehaviour {
         isHoldExecute = false;
     }
 
-    public void FreeFall() {
+    public bool FreeFall() {
         currentMino.transform.position += Vector3.down;
 
         if(!IsMinoMove()) {
             currentMino.transform.position += Vector3.up;
             PlaceMinoOnTheBoard();
+            return false;
         }
+
+        return true;
     }
 
     public void MoveLeft() {
