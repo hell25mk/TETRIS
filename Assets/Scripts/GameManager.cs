@@ -19,8 +19,6 @@ public class GameManager : MonoBehaviour {
 
     private GameMode gameMode;
     private float gameTimer;
-    private float minoFallTimer;
-    private float minoFallInterval;
 
     public void Start() {
         minoBoard = minoBoardObject.GetComponent<MinoBoard>();
@@ -56,65 +54,19 @@ public class GameManager : MonoBehaviour {
     public void InitializeInGame() {
         minoBoard.Initialize();
         minoController.Initialize(minoBoard);
-        minoFallTimer = 0.0f;
-        minoFallInterval = 1.0f;
     }
 
     public void UpdateInGame() {
-        if(!minoController.HasCurrentMino) {
-            // 次のミノが出てきた時点でミノが被っていたらゲームオーバー
-            if(!minoController.SetCurrentMino()) {
-                gameMode = GameMode.GameOver;
-            }
-            return;
+        minoController.OnUpdate();
+
+        if(!minoController.IsMinoControll) {
+            gameMode = GameMode.GameOver;
         }
-
-        PlayerInput();
-
-        if(minoFallTimer < minoFallInterval) {
-            minoFallTimer += Time.deltaTime;
-            return;
-        }
-
-        minoFallTimer = 0.0f;
-        minoController.FreeFall();
     }
 
     public void UpdateGameOver() {
         if(Input.GetKeyDown(KeyCode.Alpha2)) {
             gameMode = GameMode.Title;
-        }
-    }
-
-    private void PlayerInput() {
-        if(Input.GetKeyDown(KeyCode.LeftArrow)) {
-            minoController.MoveLeft();
-        }
-        if(Input.GetKeyDown(KeyCode.RightArrow)) {
-            minoController.MoveRight();
-        }
-        if(Input.GetKey(KeyCode.DownArrow)) {
-            minoFallInterval = 0.01f;
-        }
-        else {
-            minoFallInterval = 1.0f;
-        }
-        if(Input.GetKeyDown(KeyCode.UpArrow)) {
-            while(true) {
-                if(!minoController.FreeFall()) {
-                    return;
-                }
-            }
-        }
-
-        if(Input.GetKeyDown(KeyCode.A)) {
-            minoController.RotateLeft();
-        }
-        if(Input.GetKeyDown(KeyCode.D)) {
-            minoController.RotateRight();
-        }
-        if(Input.GetKeyDown(KeyCode.Space)) {
-            minoController.Hold();
         }
     }
 

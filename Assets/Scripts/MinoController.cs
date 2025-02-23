@@ -1,4 +1,5 @@
 using UnityEngine;
+using static GameManager;
 
 public class MinoController : MonoBehaviour {
     [SerializeField]
@@ -9,20 +10,25 @@ public class MinoController : MonoBehaviour {
     private TetriMino currentMino;
     private TetriMino holdMino;
     private bool isHoldExecute;
+    private float minoFallTimer;
+    private float minoFallInterval;
+    private bool isMinoControll;
 
-    public bool HasCurrentMino {
-        get => currentMino != null;
-    }
+    public bool IsMinoControll => isMinoControll;
 
     public void Start() {
         minoQueue = minoQueueObject.GetComponent<MinoQueue>();
+        minoQueue.Initialize();
         currentMino = null;
         holdMino = null;
+        isMinoControll = true;
+        isHoldExecute = false;
+        minoFallTimer = 0.0f;
+        minoFallInterval = 1.0f;
     }
 
     public void Initialize(MinoBoard board) {
         minoBoard = board;
-        minoQueue.Initialize();
 
         if(currentMino != null) {
             Destroy(currentMino.gameObject);
@@ -32,8 +38,58 @@ public class MinoController : MonoBehaviour {
             Destroy(holdMino.gameObject);
             holdMino = null;
         }
+    }
 
-        isHoldExecute = false;
+    public void OnUpdate() {
+        if(!isMinoControll) {
+            return;
+        }
+
+        if(currentMino == null) {
+            SetCurrentMino();
+        }
+
+        KeyInput();
+
+        if(minoFallTimer < minoFallInterval) {
+            minoFallTimer += Time.deltaTime;
+            return;
+        }
+
+        FreeFall();
+        minoFallTimer = 0.0f;
+    }
+
+    public void KeyInput() {
+        if(Input.GetKeyDown(KeyCode.LeftArrow)) {
+            MoveLeft();
+        }
+        if(Input.GetKeyDown(KeyCode.RightArrow)) {
+            MoveRight();
+        }
+        if(Input.GetKey(KeyCode.DownArrow)) {
+            minoFallInterval = 0.01f;
+        }
+        else {
+            minoFallInterval = 1.0f;
+        }
+        if(Input.GetKeyDown(KeyCode.UpArrow)) {
+            while(true) {
+                if(!FreeFall()) {
+                    return;
+                }
+            }
+        }
+
+        if(Input.GetKeyDown(KeyCode.A)) {
+            RotateLeft();
+        }
+        if(Input.GetKeyDown(KeyCode.D)) {
+            RotateRight();
+        }
+        if(Input.GetKeyDown(KeyCode.Space)) {
+            Hold();
+        }
     }
 
     public bool FreeFall() {
@@ -42,6 +98,9 @@ public class MinoController : MonoBehaviour {
         if(!IsMinoMove()) {
             currentMino.transform.position += Vector3.up;
             PlaceMinoOnTheBoard();
+            if(!SetCurrentMino()) {
+                isMinoControll = false;
+            }
             return false;
         }
 
