@@ -17,7 +17,7 @@ public class MinoQueue : MonoBehaviour {
         minoQueue = new Queue<EMinoType.Type>();
     }
 
-    private void FisherYastesShuffle() {
+    private void FisherYatesShuffle() {
         for(int i = EMinoType.TypeCount - 1; i > 0; --i) {
             int j = Random.Range(0, i + 1);
 
@@ -26,7 +26,7 @@ public class MinoQueue : MonoBehaviour {
     }
 
     public void Refill() {
-        FisherYastesShuffle();
+        FisherYatesShuffle();
 
         foreach(EMinoType.Type type in minoTypes){
             minoQueue.Enqueue(type);
